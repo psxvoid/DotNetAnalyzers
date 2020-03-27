@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
@@ -92,6 +93,9 @@ namespace DotNetAnalyzers
 
         private static void SyntaxTreeAction(SyntaxTreeAnalysisContext context)
         {
+            if (!Regex.Match(context.Tree.FilePath, @"\.cs$").Success
+                || Regex.Match(context.Tree.FilePath, @"GlobalSuppressions\.cs$").Success) return;
+
             SourceText text = context.Tree.GetText();
 
             foreach (TextLine line in text.Lines)
