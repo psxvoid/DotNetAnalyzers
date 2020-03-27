@@ -26,6 +26,15 @@ namespace TestHelper
         }
 
         /// <summary>
+        /// Gets the CSharp analyzer options for the analyzer being tested.
+        /// </summary>
+        /// <returns>Returns the analyzer options that will be used for the test.</returns>
+        protected virtual AnalyzerOptions GetAnalyzerOptions()
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Get the Visual Basic analyzer being tested (C#) - to be implemented in non-abstract class.
         /// </summary>
         /// <returns>Return the analyzer that should be verified.</returns>
@@ -46,7 +55,7 @@ namespace TestHelper
         /// <param name="expected"> DiagnosticResults that should appear after the analyzer is run on the source.</param>
         protected void VerifyCSharpDiagnostic(string source, params DiagnosticResult[] expected)
         {
-            VerifyDiagnostics(new[] { source }, LanguageNames.CSharp, this.GetCSharpDiagnosticAnalyzer(), expected);
+            VerifyDiagnostics(new[] { source }, LanguageNames.CSharp, this.GetCSharpDiagnosticAnalyzer(), this.GetAnalyzerOptions(), expected);
         }
 
         /// <summary>
@@ -57,7 +66,7 @@ namespace TestHelper
         /// <param name="expected">DiagnosticResults that should appear after the analyzer is run on the source.</param>
         protected void VerifyBasicDiagnostic(string source, params DiagnosticResult[] expected)
         {
-            VerifyDiagnostics(new[] { source }, LanguageNames.VisualBasic, this.GetBasicDiagnosticAnalyzer(), expected);
+            VerifyDiagnostics(new[] { source }, LanguageNames.VisualBasic, this.GetBasicDiagnosticAnalyzer(), expected: expected);
         }
 
         /// <summary>
@@ -68,7 +77,8 @@ namespace TestHelper
         /// <param name="expected">DiagnosticResults that should appear after the analyzer is run on the sources.</param>
         protected void VerifyCSharpDiagnostic(string[] sources, params DiagnosticResult[] expected)
         {
-            VerifyDiagnostics(sources, LanguageNames.CSharp, this.GetCSharpDiagnosticAnalyzer(), expected);
+            AnalyzerOptions options = this.GetAnalyzerOptions();
+            VerifyDiagnostics(sources, LanguageNames.CSharp, this.GetCSharpDiagnosticAnalyzer(), options, expected);
         }
 
         /// <summary>
@@ -79,7 +89,7 @@ namespace TestHelper
         /// <param name="expected">DiagnosticResults that should appear after the analyzer is run on the sources.</param>
         protected void VerifyBasicDiagnostic(string[] sources, params DiagnosticResult[] expected)
         {
-            VerifyDiagnostics(sources, LanguageNames.VisualBasic, this.GetBasicDiagnosticAnalyzer(), expected);
+            VerifyDiagnostics(sources, LanguageNames.VisualBasic, this.GetBasicDiagnosticAnalyzer(), expected: expected);
         }
 
         /// <summary>
@@ -89,10 +99,11 @@ namespace TestHelper
         /// <param name="sources">An array of strings to create source documents from to run the analyzers on.</param>
         /// <param name="language">The language of the classes represented by the source strings.</param>
         /// <param name="analyzer">The analyzer to be run on the source code.</param>
+        /// <param name="options">The options that have to be provided to the analyzer.</param>
         /// <param name="expected">DiagnosticResults that should appear after the analyzer is run on the sources.</param>
-        private static void VerifyDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer, params DiagnosticResult[] expected)
+        private static void VerifyDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer, AnalyzerOptions options = null, params DiagnosticResult[] expected)
         {
-            Diagnostic[] diagnostics = GetSortedDiagnostics(sources, language, analyzer);
+            Diagnostic[] diagnostics = GetSortedDiagnostics(sources, language, analyzer, options);
             VerifyDiagnosticResults(diagnostics, analyzer, expected);
         }
 

@@ -42,7 +42,7 @@
   <PropertyGroup>
     <SkipDefaultEditorConfigAsAdditionalFile>true</SkipDefaultEditorConfigAsAdditionalFile>
   </PropertyGroup>
-  <ItemGroup Condition="Exists('..\..\.editorconfig')" >
+  <ItemGroup Condition="Exists('..\..\.editorconfig')">
     <AdditionalFiles Include="..\..\.editorconfig" />
   </ItemGroup>
 

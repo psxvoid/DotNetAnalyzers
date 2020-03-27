@@ -1,6 +1,9 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using System.Threading;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TestHelper;
 
@@ -128,6 +131,24 @@ namespace DotNetAnalyzers.Test
         protected override DiagnosticAnalyzer GetCSharpDiagnosticAnalyzer()
         {
             return new LineLengthAnalyzer();
+        }
+
+        /// <inheritdoc/>
+        protected override AnalyzerOptions GetAnalyzerOptions()
+        {
+            return new AnalyzerOptions(
+                ImmutableArray.Create(
+                    new AdditionalText[] { new LineLengthLimitBy30AnalyserOptionsText() }));
+        }
+
+        private class LineLengthLimitBy30AnalyserOptionsText : AdditionalText
+        {
+            public override string Path => ".editorconfig";
+
+            public override SourceText GetText(CancellationToken cancellationToken = default)
+            {
+                return SourceText.From("dotnet_code_quality.line_length_limit: 100");
+            }
         }
     }
 }

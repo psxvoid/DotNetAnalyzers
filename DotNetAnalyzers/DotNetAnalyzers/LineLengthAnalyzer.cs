@@ -93,28 +93,21 @@ namespace DotNetAnalyzers
             // the action after parsing a document
             context.RegisterSyntaxTreeAction((ctx) =>
             {
-                
-                bool enabled = ctx.Options.GetBoolOptionValue(
-                    // optionName: EditorConfigOptionNames.ExcludeSingleLetterTypeParameters,
-                    optionName: "line_length_limit_enabled",
-                    rule: Rule,
-                    defaultValue: false,
-                    cancellationToken: ctx.CancellationToken);
-
                 uint limit = ctx.Options.GetUnsignedIntegralOptionValue(
-                    optionName: "line_length_limit",
+                    optionName: EditorConfigOptionNames.LineLengthLimit,
                     rule: Rule,
-                    defaultValue: DefaultMaxLineLength,
+                    defaultValue: 0U,
                     cancellationToken: ctx.CancellationToken);
 
-                SyntaxTreeAction(ctx, enabled, limit);
+                SyntaxTreeAction(ctx, limit);
             });
         }
 
-        private static void SyntaxTreeAction(SyntaxTreeAnalysisContext context, bool enabled, uint maxLineLength)
+        private static void SyntaxTreeAction(SyntaxTreeAnalysisContext context, uint maxLineLength)
         {
-            if (!enabled || (!Regex.Match(context.Tree.FilePath, @"\.cs$").Success
-                || Regex.Match(context.Tree.FilePath, @"GlobalSuppressions\.cs$").Success)) return;
+            if (maxLineLength == 0
+                || !Regex.Match(context.Tree.FilePath, @"\.cs$").Success
+                || Regex.Match(context.Tree.FilePath, @"GlobalSuppressions\.cs$").Success) return;
 
             SourceText text = context.Tree.GetText();
 

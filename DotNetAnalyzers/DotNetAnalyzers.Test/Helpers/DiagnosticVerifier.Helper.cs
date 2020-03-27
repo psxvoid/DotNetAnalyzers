@@ -47,10 +47,11 @@ namespace TestHelper
         /// <param name="sources">Classes in the form of strings.</param>
         /// <param name="language">The language the source classes are in.</param>
         /// <param name="analyzer">The analyzer to be run on the sources.</param>
+        /// <param name="options">The options that have to be provided to the analyzer.</param>
         /// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location.</returns>
-        private static Diagnostic[] GetSortedDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer)
+        private static Diagnostic[] GetSortedDiagnostics(string[] sources, string language, DiagnosticAnalyzer analyzer, AnalyzerOptions options = null)
         {
-            return GetSortedDiagnosticsFromDocuments(analyzer, GetDocuments(sources, language));
+            return GetSortedDiagnosticsFromDocuments(analyzer, GetDocuments(sources, language), options);
         }
 
         /// <summary>
@@ -59,8 +60,9 @@ namespace TestHelper
         /// </summary>
         /// <param name="analyzer">The analyzer to run on the documents.</param>
         /// <param name="documents">The Documents that the analyzer will be run on.</param>
+        /// <param name="options">The options that have to be provided to the analyzer.</param>
         /// <returns>An IEnumerable of Diagnostics that surfaced in the source code, sorted by Location.</returns>
-        protected static Diagnostic[] GetSortedDiagnosticsFromDocuments(DiagnosticAnalyzer analyzer, Document[] documents)
+        protected static Diagnostic[] GetSortedDiagnosticsFromDocuments(DiagnosticAnalyzer analyzer, Document[] documents, AnalyzerOptions options = null)
         {
             _ = documents ?? throw new ArgumentNullException(nameof(documents));
 
@@ -71,9 +73,19 @@ namespace TestHelper
             }
 
             var diagnostics = new List<Diagnostic>();
+
             foreach (Project project in projects)
             {
-                CompilationWithAnalyzers compilationWithAnalyzers = project.GetCompilationAsync().Result.WithAnalyzers(ImmutableArray.Create(analyzer));
+                CompilationWithAnalyzers compilationWithAnalyzers;
+                if (options == null)
+                {
+                    compilationWithAnalyzers = project.GetCompilationAsync().Result.WithAnalyzers(ImmutableArray.Create(analyzer));
+                }
+                else
+                {
+                    compilationWithAnalyzers = project.GetCompilationAsync().Result.WithAnalyzers(ImmutableArray.Create(analyzer), options);
+                }
+
                 foreach (Diagnostic diagnostic in compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync().Result)
                 {
                     if (diagnostic.Location == Location.None || diagnostic.Location.IsInMetadata)
