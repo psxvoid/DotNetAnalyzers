@@ -10,7 +10,6 @@
 
 namespace DotNetAnalyzers {
     using System;
-    using System.Reflection;
     
     
     /// <summary>
@@ -40,7 +39,7 @@ namespace DotNetAnalyzers {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetAnalyzers.Resources", typeof(Resources).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetAnalyzers.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -71,7 +70,7 @@ namespace DotNetAnalyzers {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Line &apos;{0}&apos; exceeded the configured maximum length by &apos;{1}&apos; characters.
+        ///   Looks up a localized string similar to Line &apos;{0}&apos; exceeded the configured maximum length of &apos;{1}&apos; by &apos;{2}&apos; characters.
         /// </summary>
         internal static string LineLengthAnalyzerMessageFormat {
             get {

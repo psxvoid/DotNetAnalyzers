@@ -79,7 +79,7 @@ namespace DotNetAnalyzers.Test
             var expected = new DiagnosticResult
             {
                 Id = "LineLengthAnalyzer",
-                Message = "Line '16' exceeded the configured maximum length by '22' characters",
+                Message = "Line '16' exceeded the configured maximum length of '100' by '22' characters",
                 Severity = DiagnosticSeverity.Warning,
                 Locations =
                     new[] { new DiagnosticResultLocation("Test0.cs", 16, 22) },

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Immutable;
 using System.Text.RegularExpressions;
+using Analyzer.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
@@ -35,9 +36,11 @@ namespace DotNetAnalyzers
         /// </summary>
         public const string DiagnosticId = "LineLengthAnalyzer";
 
+        private const string EditorConfigName = "line_length_limit";
+
         private const string Category = "Readability";
 
-        private const int MaxLineLength = 100;
+        private const uint DefaultMaxLineLength = 100U;
 
         // You can change these strings in the Resources.resx file.
         // If you do not want your analyzer to be localize-able,
@@ -81,20 +84,37 @@ namespace DotNetAnalyzers
         {
             _ = context ?? throw new ArgumentNullException(nameof(context));
 
-            context.ConfigureGeneratedCodeAnalysis(
-                GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
-
             // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/Analyzer%20Actions%20Semantics.md for more information
             context.EnableConcurrentExecution();
 
+            context.ConfigureGeneratedCodeAnalysis(
+                GeneratedCodeAnalysisFlags.Analyze | GeneratedCodeAnalysisFlags.ReportDiagnostics);
+
             // the action after parsing a document
-            context.RegisterSyntaxTreeAction(SyntaxTreeAction);
+            context.RegisterSyntaxTreeAction((ctx) =>
+            {
+                
+                bool enabled = ctx.Options.GetBoolOptionValue(
+                    // optionName: EditorConfigOptionNames.ExcludeSingleLetterTypeParameters,
+                    optionName: "line_length_limit_enabled",
+                    rule: Rule,
+                    defaultValue: false,
+                    cancellationToken: ctx.CancellationToken);
+
+                uint limit = ctx.Options.GetUnsignedIntegralOptionValue(
+                    optionName: "line_length_limit",
+                    rule: Rule,
+                    defaultValue: DefaultMaxLineLength,
+                    cancellationToken: ctx.CancellationToken);
+
+                SyntaxTreeAction(ctx, enabled, limit);
+            });
         }
 
-        private static void SyntaxTreeAction(SyntaxTreeAnalysisContext context)
+        private static void SyntaxTreeAction(SyntaxTreeAnalysisContext context, bool enabled, uint maxLineLength)
         {
-            if (!Regex.Match(context.Tree.FilePath, @"\.cs$").Success
-                || Regex.Match(context.Tree.FilePath, @"GlobalSuppressions\.cs$").Success) return;
+            if (!enabled || (!Regex.Match(context.Tree.FilePath, @"\.cs$").Success
+                || Regex.Match(context.Tree.FilePath, @"GlobalSuppressions\.cs$").Success)) return;
 
             SourceText text = context.Tree.GetText();
 
@@ -102,7 +122,7 @@ namespace DotNetAnalyzers
             {
                 int length = line.End - line.Start;
 
-                if (length <= MaxLineLength) continue;
+                if (length <= maxLineLength) continue;
 
                 var location = Location.Create(context.Tree, line.Span);
 
@@ -111,7 +131,8 @@ namespace DotNetAnalyzers
                         Rule,
                         location,
                         line.LineNumber + 1,
-                        length - MaxLineLength);
+                        maxLineLength,
+                        length - maxLineLength);
 
                 context.ReportDiagnostic(diagnostic);
             }
