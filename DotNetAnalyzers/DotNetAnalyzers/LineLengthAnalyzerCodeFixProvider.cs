@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using System;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -37,14 +38,18 @@ namespace DotNetAnalyzers
         /// <inheritdoc/>
         public sealed override async Task RegisterCodeFixesAsync(CodeFixContext context)
         {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             SyntaxNode root = await context.Document.GetSyntaxRootAsync(context.CancellationToken).ConfigureAwait(false);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
             // TODO: Replace the following code with your own analysis, generating a CodeAction for each fix to suggest
             Diagnostic diagnostic = context.Diagnostics[0];
             Microsoft.CodeAnalysis.Text.TextSpan diagnosticSpan = diagnostic.Location.SourceSpan;
 
             // Find the type declaration identified by the diagnostic.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             TypeDeclarationSyntax declaration = root.FindToken(diagnosticSpan.Start).Parent.AncestorsAndSelf().OfType<TypeDeclarationSyntax>().First();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             // Register a code action that will invoke the fix.
             context.RegisterCodeFix(
@@ -62,8 +67,12 @@ namespace DotNetAnalyzers
             string newName = identifierToken.Text.ToUpperInvariant();
 
             // Get the symbol representing the type to be renamed.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             SemanticModel semanticModel = await document.GetSemanticModelAsync(cancellationToken).ConfigureAwait(false);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             INamedTypeSymbol typeSymbol = semanticModel.GetDeclaredSymbol(typeDecl, cancellationToken);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
             // Produce a new solution that has all references to that type renamed, including the declaration.
             Solution originalSolution = document.Project.Solution;

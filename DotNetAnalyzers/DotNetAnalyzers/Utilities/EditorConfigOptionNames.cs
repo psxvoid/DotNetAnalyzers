@@ -12,7 +12,7 @@ namespace Analyzer.Utilities
         /// a line length won't be verified by <see cref="LineLengthAnalyzer"/>. When this option
         /// is set to a value greater than 0 then the value will be used to ensure that all line
         /// length do not exceed that value.
-        /// <para>Notice: the options should be set in .editorconfig using 'dotnet_code_quality.line_length_limit'."</para>
+        /// <para>Notice: the options should be set in .editorconfig using 'dotnet_code_quality.line_length_limit'.</para>
         /// </summary>
         /// <example>
         /// <code>dotnet_code_quality.line_length_limit: 100</code>

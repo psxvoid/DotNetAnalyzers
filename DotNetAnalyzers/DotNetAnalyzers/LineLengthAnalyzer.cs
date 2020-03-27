@@ -12,9 +12,6 @@ namespace DotNetAnalyzers
     /// <para>To Do:</para>
     /// <list type="bullet">
     /// <item>
-    /// <description>configure line length</description>
-    /// </item>
-    /// <item>
     /// <description>configure "ignore comments"</description>
     /// </item>
     /// <item>
@@ -36,11 +33,7 @@ namespace DotNetAnalyzers
         /// </summary>
         public const string DiagnosticId = "LineLengthAnalyzer";
 
-        private const string EditorConfigName = "line_length_limit";
-
         private const string Category = "Readability";
-
-        private const uint DefaultMaxLineLength = 100U;
 
         // You can change these strings in the Resources.resx file.
         // If you do not want your analyzer to be localize-able,
@@ -107,7 +100,10 @@ namespace DotNetAnalyzers
         {
             if (maxLineLength == 0
                 || !Regex.Match(context.Tree.FilePath, @"\.cs$").Success
-                || Regex.Match(context.Tree.FilePath, @"GlobalSuppressions\.cs$").Success) return;
+                || Regex.Match(context.Tree.FilePath, @"GlobalSuppressions\.cs$").Success)
+            {
+                return;
+            }
 
             SourceText text = context.Tree.GetText();
 
