@@ -1,0 +1,3 @@
+[submodule "roslyn-analyzers"]
+	path = roslyn-analyzers
+	url = https://github.com/dotnet/roslyn-analyzers
